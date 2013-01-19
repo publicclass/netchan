@@ -1,0 +1,19 @@
+{
+  "name": "netchan",
+  "version": "0.0.1",
+  "description": "A NetChan implementation wrapping an unreliable DataChannel.",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha test.js"
+  },
+  "repository": "",
+  "author": "Robert Sköld <robert@publicclass.se>",
+  "license": "MIT",
+  "devDependencies": {
+    "expect.js": "~0.2.0",
+    "mocha": "~1.8.1"
+  },
+  "engines": {
+    "node" : ">=0.9.4"
+  }
+}
