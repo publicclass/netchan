@@ -1,7 +1,8 @@
 test: test.js node_modules
-	./node_modules/.bin/mocha test.js
+	./node_modules/.bin/mocha -r expect.js test.js
 
 build: build/build.js
+	@:
 
 components: component.json
 	@component install --dev
@@ -9,7 +10,7 @@ components: component.json
 test.js: build/build.js
 	./node_modules/.bin/mocha test.js
 
-build/build.js: components index.js
+build/build.js: index.js
 	@component build --dev
 
 node_modules:

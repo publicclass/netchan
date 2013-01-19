@@ -1,6 +1,4 @@
-var NetChannel = require('./index')
-  , expect = require('expect.js');
-
+var NetChannel = require('netchan');
 
 function fakeDataChannel(){
   return {
@@ -30,8 +28,8 @@ describe('NetChannel',function(){
 
     var msg = nc.encode();
     var dat = new DataView(msg);
-    expect(dat.getInt16(0,true)).to.equal(0) // ack
-    expect(dat.getInt16(2,true)).to.equal(1) // seq
+    expect(dat.getInt16(0)).to.equal(0) // ack
+    expect(dat.getInt16(2)).to.equal(1) // seq
     expect(dat.getUint8(4)).to.equal(4)      // len
     expect(dat.getUint8(5)).to.equal(1)      // msg[0]
     expect(dat.getUint8(6)).to.equal(2)      // msg[1]
@@ -45,7 +43,7 @@ describe('NetChannel',function(){
       expect(dat.getUint8(1)).to.equal(2)
       expect(dat.getUint8(2)).to.equal(3)
       expect(dat.getUint8(3)).to.equal(4)
-      expect(function(){ dat.getUint8(4) }).to.throwError(/Index out of range/)
+      expect(function(){ dat.getUint8(4) }).to.throwError(/Index out of range|IndexSizeError/)
       called++;
     }
 

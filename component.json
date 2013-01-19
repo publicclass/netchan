@@ -6,7 +6,8 @@
   "keywords": [],
   "dependencies": {},
   "development": {
-    "publicclass/base64-arraybuffer": "*"
+    "publicclass/base64-arraybuffer": "*",
+    "visionmedia/mocha": "*"
   },
   "license": "MIT",
   "scripts": [

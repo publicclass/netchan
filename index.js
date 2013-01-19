@@ -22,7 +22,7 @@ module.exports = NetChannel;
 function NetChannel(channel){
   this.seq = 1;
   this.ack = 0;
-  this.buffer = [];
+  this.buffer = []; // [seq,buf]
   this.bufferLength = 0;
   this.sequences = [];
 
@@ -54,18 +54,16 @@ NetChannel.prototype = {
     if( !msg.byteLength )
       throw new Error('invalid message type, only binary is supported');
 
-    if( msg.byteLength > 65536 )
-      throw new Error('invalid message length, only 16bit is supported')
+    if( msg.byteLength > 256 )
+      throw new Error('invalid message length, only up to 256 bytes are supported')
 
     // grow by 3 bytes (seq & len)
     var seq = this.seq++;
     var buf = new Uint8Array(3+msg.byteLength);
-    var dat = new DataView(buf);
+    var dat = new DataView(buf.buffer);
     dat.setUint16(0,seq);
     dat.setUint8(2,msg.byteLength);
     buf.set(new Uint8Array(msg),3);
-
-    // TODO some kind of sequence lookup table?
 
     this.bufferLength += buf.byteLength;
     this.buffer.push(seq,buf);
@@ -82,7 +80,7 @@ NetChannel.prototype = {
   encode: function(){
     // grow by 2 bytes (ack) + unsent buffer
     var buf = new Uint8Array(2+this.bufferLength);
-    var data = new DataView(buf);
+    var data = new DataView(buf.buffer);
 
     // prepend with ack number
     data.setUint16(0,this.ack)
@@ -101,7 +99,7 @@ NetChannel.prototype = {
   // ack,seq1,len1,data1[,seq2,len2,data2...]
   decode: function(buf){
     // read the sequence and ack
-    var data = new DataView(buf)
+    var data = new DataView(buf.buffer || buf)
     var ack = data.getUint16(0,true)
 
     // read messages
@@ -110,8 +108,10 @@ NetChannel.prototype = {
       , seq = this.ack // in case no messages are read, its the same
       , len = 0;
 
+    console.log(buf)
+
     while(offset < length){
-      seq = data.getUint16(offset,true);
+      seq = data.getUint16(offset);
       len = data.getUint8(offset+2);
       if( seq <= this.ack ){
         // console.log('skipping message %s, already acknowledged %s',seq,this.ack)
@@ -125,7 +125,7 @@ NetChannel.prototype = {
       // emit onmessage for each message
       this.onmessage(msg)
 
-      offset += len + 3;
+      offset += len+3;
     }
 
     // store the sequence as the last acknowledged one
