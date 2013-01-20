@@ -34,7 +34,6 @@
     }
 
     // only binary supported by NetChannel
-    // (but will be transmitted as Base64 until binary is supported)
     netchan.send(buf);
 
 
