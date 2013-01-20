@@ -65,8 +65,6 @@ NetChannel.prototype = {
     this.bufferLength += buf.byteLength;
     this.buffer.push(seq,buf);
 
-    // console.log('adding %s to buffer',seq)
-
     this.flush();
   },
 
@@ -102,8 +100,6 @@ NetChannel.prototype = {
     var data = new DataView(buf.buffer || buf)
     var ack = data.getUint16(0)
 
-    // console.log('decode',buf)
-
     // read messages
     var offset = 2 // start after ack
       , length = buf.byteLength
@@ -114,13 +110,11 @@ NetChannel.prototype = {
       seq = data.getUint16(offset);
       len = data.getUint8(offset+2);
       if( seq <= this.ack ){
-        // console.log('skipping message %s, already acknowledged %s',seq,this.ack)
         offset += len+3;
         continue;
       }
 
       // get the message
-      // console.log('offset: %s seq: %s len: %s',offset,seq,len)
       var msg = data.buffer.slice(offset+3,offset+3+len);
       offset += len+3;
 
@@ -147,7 +141,6 @@ NetChannel.prototype = {
     for(var i=0; i < this.buffer.length; i+=2){
       var s = this.buffer[i];
       if(s <= this.ack){
-        // console.log('removing %s from buffer',s)
         index = i+2;
         length += this.buffer[i+1].byteLength;
       }
@@ -155,7 +148,6 @@ NetChannel.prototype = {
     if( index !== null ){
       this.buffer.splice(0,index);
       this.bufferLength -= length;
-      // console.log('removed %s bytes from buffer, new buffer length: %s',length,this.bufferLength)
     }
   }
 
