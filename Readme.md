@@ -5,12 +5,25 @@
 
   A NetChan implementation wrapping an unreliable DataChannel.
 
+  It encodes binary messages (either a `TypedArray` or an `ArrayBuffer`) and adds a sequence to it to make sure they will be delivered.
+
 ## Installation
 
     $ component install publicclass/netchan
 
 ## API
 
+### new NetChannel(channel)
+
+  Create a NetChannel instance. Pass in the `DataChannel` instance that will send the encoded messages.
+
+### NetChannel#onmessage(msg)
+
+  A callback which will be called with any new decoded message.
+
+### NetChannel#send(msg)
+
+  Adds a `msg` to the buffer which is encoded and then sent over the `DataChannel`.
 
 ## Example
 
@@ -45,6 +58,11 @@
 
     $ make
 
+  To run a simple DataChannel test in your browser open `dc.html`. It uses a base64 wrapper to bypass the current lack of binary support in DataChannel so you'll be required to build a dev version first.
+
+    $ component install --dev
+    $ component build --dev
+    $ open dc.html
 
 ## License
 
