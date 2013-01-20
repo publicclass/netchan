@@ -40,7 +40,6 @@ NetChannel.prototype = {
 
   recv: function(e){
     this.decode(e.data)
-    this.shrink()
     this.flush()
   },
 
@@ -103,6 +102,8 @@ NetChannel.prototype = {
     var data = new DataView(buf.buffer || buf)
     var ack = data.getUint16(0)
 
+    // console.log('decode',buf)
+
     // read messages
     var offset = 2 // start after ack
       , length = buf.byteLength
@@ -119,33 +120,42 @@ NetChannel.prototype = {
       }
 
       // get the message
+      // console.log('offset: %s seq: %s len: %s',offset,seq,len)
       var msg = data.buffer.slice(offset+3,offset+3+len);
+      offset += len+3;
 
       // emit onmessage for each message
-      this.onmessage(msg)
-
-      offset += len+3;
+      try {
+        this.onmessage(msg)
+      } catch(e){
+        console.warn('Error in onmessage callback',e)
+      }
     }
 
     // store the sequence as the last acknowledged one
     this.ack = seq;
+
+    this.shrink()
   },
 
   // shrink the buffer & bufferLength up to the
   // acknowledged messages.
+  // assumes this.buffer is sorted by sequence
   shrink: function(){
     var index = null
       , length = 0;
     for(var i=0; i < this.buffer.length; i+=2){
       var s = this.buffer[i];
       if(s <= this.ack){
-        index = i;
+        // console.log('removing %s from buffer',s)
+        index = i+2;
         length += this.buffer[i+1].byteLength;
       }
     }
     if( index !== null ){
-      this.buffer.splice(0,index+2);
+      this.buffer.splice(0,index);
       this.bufferLength -= length;
+      // console.log('removed %s bytes from buffer, new buffer length: %s',length,this.bufferLength)
     }
   }
 

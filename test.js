@@ -29,23 +29,14 @@ describe('NetChannel',function(){
       expect(netchan.ack).to.equal(0)
 
       netchan.onmessage = function(msg){
-        var dat = new DataView(msg);
-        expect(dat.getUint8(0)).to.equal(1)
-        expect(dat.getUint8(1)).to.equal(2)
-        expect(dat.getUint8(2)).to.equal(3)
-        expect(dat.getUint8(3)).to.equal(4)
-        expect(function(){ dat.getUint8(4) }).to.throwError(/Index out of range|IndexSizeError/)
+        // console.log('onmessage',msg)
+        expect(msg).to.eql(new Uint8Array([1,2,3,4]).buffer)
         called++;
       }
     })
 
     it('should make a buffer with 1,2,3,4',function(){
-      var dat = new DataView(new ArrayBuffer(4));
-      dat.setUint8(0,1)
-      dat.setUint8(1,2)
-      dat.setUint8(2,3)
-      dat.setUint8(3,4)
-      buffer = dat.buffer;
+      buffer = new Uint8Array([1,2,3,4]).buffer
     })
 
     it('should send that buffer and update the sequence',function(){
@@ -63,8 +54,8 @@ describe('NetChannel',function(){
     })
 
     it('should have a message of the right size',function(){
-      // 2 = ack
-      // 3 = len + seq
+      // 2 = ack(2)
+      // 3 = len(1) + seq(2)
       expect(msg.byteLength).to.equal(2+(buffer.byteLength + 3))
     })
 
@@ -87,6 +78,10 @@ describe('NetChannel',function(){
       expect(called).to.equal(1)
     })
 
+    it('should have shrunk the buffer to 0',function(){
+      expect(netchan.bufferLength).to.equal(0)
+    })
+
     it('should send 2 messages',function(){
       netchan.send(buffer.slice(0)); // use copy of buffer
       expect(netchan.seq).to.equal(3)
@@ -100,7 +95,7 @@ describe('NetChannel',function(){
     it('should have a buffer of the right size',function(){
       // 3 = len + seq
       // *3 = 3 messages (before ack we resend the first one)
-      expect(netchan.bufferLength).to.equal((buffer.byteLength + 3)*3)
+      expect(netchan.bufferLength).to.equal((buffer.byteLength + 3)*2)
     })
 
     it('should encode 2 message',function(){
@@ -112,8 +107,8 @@ describe('NetChannel',function(){
     it('should have a message of the right size',function(){
       // 2 = ack
       // 3 = len + seq
-      // *3 = 3 messages (before ack we resend the first one)
-      expect(msg.byteLength).to.equal(2+(buffer.byteLength + 3)*3)
+      // *2 = 2 messages
+      expect(msg.byteLength).to.equal(2+(buffer.byteLength + 3)*2)
     })
 
     it('should decode 2 messages (ack += 2)',function(){
