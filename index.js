@@ -100,15 +100,13 @@ NetChannel.prototype = {
   decode: function(buf){
     // read the sequence and ack
     var data = new DataView(buf.buffer || buf)
-    var ack = data.getUint16(0,true)
+    var ack = data.getUint16(0)
 
     // read messages
     var offset = 2 // start after ack
       , length = buf.byteLength
       , seq = this.ack // in case no messages are read, its the same
       , len = 0;
-
-    console.log(buf)
 
     while(offset < length){
       seq = data.getUint16(offset);

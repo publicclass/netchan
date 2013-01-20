@@ -1,5 +1,5 @@
 test: test.js node_modules
-	./node_modules/.bin/mocha -r expect.js test.js
+	./node_modules/.bin/mocha test.js
 
 build: build/build.js
 	@:
