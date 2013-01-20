@@ -40,7 +40,7 @@
 
 ## Testing
 
-  Because Node 0.8 lacks ArrayBuffer#slice it must be ran with Node 0.9.4+.
+  Because Node 0.8 lacks ArrayBuffer#slice it must be ran with Node 0.9.4+ but it will fail on 0.9.7 because of [a regression](https://github.com/joyent/node/issues/4626).
 
   To unit test simply run:
 
