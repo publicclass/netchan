@@ -1,6 +1,8 @@
 
 # netchan
 
+[![Build Status](https://travis-ci.org/publicclass/netchan.png?branch=master)](https://travis-ci.org/publicclass/netchan)
+
   A NetChan implementation wrapping an unreliable DataChannel.
 
 ## Installation
