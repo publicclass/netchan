@@ -224,4 +224,7 @@ describe('NetChannel',function(){
 
   // TODO make a test which uses a fake data channel
 
+  // TODO make a test verifying the order of messages
+
+
 })
