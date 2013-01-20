@@ -19,7 +19,7 @@
 
 ### NetChannel#onmessage(msg)
 
-  A callback which will be called with any new decoded message.
+  A callback which will be called with any new decoded message received from the `DataChannel`.
 
 ### NetChannel#send(msg)
 
