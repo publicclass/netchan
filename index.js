@@ -40,10 +40,8 @@ NetChannel.prototype = {
 
   recv: function(e){
     this.decode(e.data)
-
-    // flush in case there's more non-acked messages
-    // in buffer
-    this.flush();
+    this.shrink()
+    this.flush()
   },
 
   send: function(msg){
@@ -67,6 +65,9 @@ NetChannel.prototype = {
 
     this.bufferLength += buf.byteLength;
     this.buffer.push(seq,buf);
+
+    // console.log('adding %s to buffer',seq)
+
     this.flush();
   },
 
@@ -128,20 +129,24 @@ NetChannel.prototype = {
 
     // store the sequence as the last acknowledged one
     this.ack = seq;
+  },
 
-    // shrink the buffer & bufferLength up to the
-    // acknowledged messages.
-    var rm = 0
-      , rmLength = 0;
+  // shrink the buffer & bufferLength up to the
+  // acknowledged messages.
+  shrink: function(){
+    var index = null
+      , length = 0;
     for(var i=0; i < this.buffer.length; i+=2){
-      if(this.buffer[i] <= this.ack){
-        rm = i;
-        rmLength += this.buffer[i+1].byteLength;
+      var s = this.buffer[i];
+      if(s <= this.ack){
+        index = i;
+        length += this.buffer[i+1].byteLength;
       }
     }
-    if( rm ){
-      this.buffer.splice(0,rm+2);
-      this.bufferLength -= rmLength;
+    if( index !== null ){
+      this.buffer.splice(0,index+2);
+      this.bufferLength -= length;
     }
   }
+
 }
