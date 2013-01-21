@@ -4,7 +4,9 @@
   "description": "A NetChan implementation wrapping an unreliable DataChannel.",
   "version": "0.0.1",
   "keywords": [],
-  "dependencies": {},
+  "dependencies": {
+    "publicclass/latency": "*"
+  },
   "development": {
     "publicclass/base64-arraybuffer": "*",
     "visionmedia/mocha": "*"

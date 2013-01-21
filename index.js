@@ -1,4 +1,7 @@
 
+var latency = require('latency');
+
+
 module.exports = NetChannel;
 
 /**
@@ -25,6 +28,10 @@ function NetChannel(channel){
   this.buffer = []; // [seq,buf]
   this.bufferLength = 0;
   this.sequences = [];
+  this.latency = undefined;
+  this.sent = {};
+  this.times = [];
+  this.timesIndex = 0;
 
   // optional (for testing)
   if( channel ){
@@ -36,7 +43,10 @@ function NetChannel(channel){
 }
 
 NetChannel.prototype = {
+
   onmessage: function(){},
+
+  onlatency: function(){},
 
   recv: function(e){
     this.decode(e.data)
@@ -64,6 +74,7 @@ NetChannel.prototype = {
 
     this.bufferLength += buf.byteLength;
     this.buffer.push(seq,buf);
+    this.sent[''+seq] = Date.now();
 
     this.flush();
   },
@@ -112,6 +123,20 @@ NetChannel.prototype = {
       if( seq <= this.ack ){
         offset += len+3;
         continue;
+      }
+
+      if( this.sent[''+seq] ){
+        // store the time it took to get an ack
+        // in a circular times buffer
+        this.times[this.timesIndex] = Date.now() - this.sent[''+seq];
+        delete this.sent[''+seq];
+        this.timesIndex = (this.timesIndex + 1) % 30;
+
+        // recalc every 10 message
+        if( this.timesIndex % 10 == 0 ){
+          this.latency = latency(this.times);
+          this.onlatency(this.latency);
+        }
       }
 
       // get the message
