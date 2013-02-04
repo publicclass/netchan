@@ -144,11 +144,7 @@ NetChannel.prototype = {
       offset += len+3;
 
       // emit onmessage for each message
-      try {
-        this.onmessage(msg)
-      } catch(e){
-        console.warn('Error in onmessage callback',e)
-      }
+      this.onmessage(msg)
     }
 
     // store the sequence as the last acknowledged one
