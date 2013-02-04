@@ -37,16 +37,16 @@ function NetChannel(channel){
   if( channel ){
     if( channel.reliable )
       throw new ArgumentError('channel must be unreliable. just use the normal data channel instead.')
+    var netchan = this;
     this.channel = channel;
-    this.channel.addEventListener('message',this.recv.bind(this),false)
+    this.channel.addEventListener('message',function(e){ netchan.recv(e) },false)
   }
 }
 
 NetChannel.prototype = {
 
-  onmessage: function(){},
-
-  onlatency: function(){},
+  onmessage: noop,
+  onlatency: noop,
 
   recv: function(e){
     this.decode(e.data)
@@ -121,7 +121,7 @@ NetChannel.prototype = {
       seq = data.getUint16(offset);
       len = data.getUint8(offset+2);
       if( seq <= this.ack ){
-        offset += len+3;
+        offset += len+3; // len + seq = 3 bytes
         continue;
       }
 
@@ -165,7 +165,7 @@ NetChannel.prototype = {
       , length = 0;
     for(var i=0; i < this.buffer.length; i+=2){
       var s = this.buffer[i];
-      if(s <= this.ack){
+      if( s <= this.ack ){
         index = i+2;
         length += this.buffer[i+1].byteLength;
       }
@@ -177,3 +177,5 @@ NetChannel.prototype = {
   }
 
 }
+
+function noop(){}
