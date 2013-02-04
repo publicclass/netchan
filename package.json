@@ -1,6 +1,6 @@
 {
   "name": "netchan",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A NetChan implementation wrapping an unreliable DataChannel.",
   "main": "index.js",
   "scripts": {
