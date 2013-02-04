@@ -8,8 +8,7 @@
     "publicclass/latency": "*"
   },
   "development": {
-    "publicclass/base64-arraybuffer": "*",
-    "visionmedia/mocha": "*"
+    "publicclass/base64-arraybuffer": "*"
   },
   "license": "MIT",
   "scripts": [

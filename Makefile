@@ -8,7 +8,7 @@ components: component.json
 	@component install --dev
 
 test.js: build/build.js
-	./node_modules/.bin/mocha test.js
+	./node_modules/.bin/mocha
 
 build/build.js: index.js
 	@component build --dev

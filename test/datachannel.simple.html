@@ -34,7 +34,8 @@
     <textarea id="dataChannelReceive" rows="5" cols="15" disabled="true">
     </textarea><br>
   </div>
-  <script src='build/build.js'></script>
+  <script src='support/expect.js'></script>
+  <script src='../build/build.js'></script>
   <script>
     var NetChannel = require('netchan')
       , base64 = require('publicclass-base64-arraybuffer')
@@ -78,8 +79,7 @@
         // Reliable Data Channels not yet supported in Chrome
         // Data Channel api supported from Chrome M25.
         // You need to start chrome with  --enable-data-channels flag.
-        sendChannel = pc1.createDataChannel("sendDataChannel",
-                                             {reliable: false});
+        sendChannel = pc1.createDataChannel("sendDataChannel",{reliable: false});
         trace('Created send data channel');
 
       } catch (e) {
