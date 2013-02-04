@@ -58,10 +58,10 @@ NetChannel.prototype = {
     if( msg && (msg.buffer instanceof ArrayBuffer) )
       msg = msg.buffer;
 
-    if( !msg.byteLength )
+    if( !(msg instanceof ArrayBuffer) )
       throw new Error('invalid message type, only binary is supported');
 
-    if( msg.byteLength > 256 )
+    if( msg.byteLength > 255 )
       throw new Error('invalid message length, only up to 256 bytes are supported')
 
     // grow by 3 bytes (seq & len)
