@@ -22,7 +22,7 @@ module.exports = NetChannel;
  * Inspired by NetChan by Id software.
  */
 
-function NetChannel(channel){
+function NetChannel(channel,options){
   this.seq = 1;
   this.ack = 0;
   this.buffer = []; // [seq,buf]
@@ -32,6 +32,11 @@ function NetChannel(channel){
   this.sent = {};
   this.times = [];
   this.timesIndex = 0;
+  this.autoFlush = true;
+
+  if( typeof options == 'object' ){
+    this.autoFlush = options.autoFlush === true;
+  }
 
   // optional (for testing)
   if( channel ){
@@ -50,7 +55,7 @@ NetChannel.prototype = {
 
   recv: function(e){
     this.decode(e.data)
-    this.flush()
+    this.autoFlush && this.flush()
   },
 
   send: function(msg){
@@ -76,7 +81,7 @@ NetChannel.prototype = {
     this.buffer.push(seq,buf);
     this.sent[''+seq] = Date.now();
 
-    this.flush();
+    this.autoFlush && this.flush();
   },
 
   flush: function(){
