@@ -49,6 +49,7 @@ describe('NetChannel',function(){
     })
 
     it('should have a buffer of the right size',function(){
+      expect(netchan.buffer).to.have.length(2)
       expect(netchan.bufferLength).to.equal((buffer.byteLength + 3))
     })
 
@@ -81,8 +82,9 @@ describe('NetChannel',function(){
       expect(called).to.equal(1)
     })
 
-    it('should have shrunk the buffer to 0',function(){
-      expect(netchan.bufferLength).to.equal(0)
+    it('should not have shrunk the buffer (ack was 0)',function(){
+      expect(netchan.buffer).to.have.length(2) // 1 msg
+      expect(netchan.bufferLength).to.equal((buffer.byteLength + 3))
     })
 
     it('should send 2 messages',function(){
@@ -98,7 +100,8 @@ describe('NetChannel',function(){
     it('should have a buffer of the right size',function(){
       // 3 = len + seq
       // *3 = 3 messages (before ack we resend the first one)
-      expect(netchan.bufferLength).to.equal((buffer.byteLength + 3)*2)
+      expect(netchan.buffer).to.have.length(6) // 3 msgs
+      expect(netchan.bufferLength).to.equal((buffer.byteLength + 3)*3)
     })
 
     it('should encode 2 message',function(){
@@ -110,8 +113,8 @@ describe('NetChannel',function(){
     it('should have a message of the right size',function(){
       // 2 = ack
       // 3 = len + seq
-      // *2 = 2 messages
-      expect(msg.byteLength).to.equal(2+(buffer.byteLength + 3)*2)
+      // *3 = 3 messages
+      expect(msg.byteLength).to.equal(2+(buffer.byteLength + 3)*3)
     })
 
     it('should decode 2 messages (ack += 2)',function(){
@@ -121,8 +124,11 @@ describe('NetChannel',function(){
       expect(called).to.equal(2)
     })
 
-    it('should have a buffer be 0 after ack',function(){
-      expect(netchan.bufferLength).to.equal(0)
+    it('should have shrunk the buffer by 1 message',function(){
+      // 3 = len + seq
+      // *2 = 2 messages (before ack we resend the first one)
+      expect(netchan.buffer).to.have.length(4) // 2 msgs
+      expect(netchan.bufferLength).to.equal((buffer.byteLength + 3)*2)
     })
 
     it('should decode 0 messages the second time',function(){
@@ -307,6 +313,10 @@ describe('NetChannel',function(){
         }
         nc2.onmessage = function(m){
           expect(new Uint8Array(m)).to.eql(new Uint8Array([4]))
+          expect(nc1).to.have.property('ack',1)
+          expect(nc1).to.have.property('bufferLength',4)
+          expect(nc2).to.have.property('ack',0)
+          expect(nc2).to.have.property('bufferLength',4)
           done()
         }
         nc2.send(new Uint8Array([3]))
