@@ -32,6 +32,7 @@ function NetChannel(channel){
   this.sent = {};
   this.times = [];
   this.timesIndex = 0;
+  this.encoded = null; // cached
 
   // optional (for testing)
   if( channel ){
@@ -75,13 +76,14 @@ NetChannel.prototype = {
     this.bufferLength += buf.byteLength;
     this.buffer.push(seq,buf);
     this.sent[''+seq] = Date.now();
+    this.encoded = null;
 
     this.flush();
   },
 
   flush: function(){
     if( this.bufferLength && this.channel )
-      this.channel.send(this.encode());
+      this.channel.send(this.encoded || this.encode());
   },
 
   // encodes into a message like this:
@@ -101,7 +103,7 @@ NetChannel.prototype = {
       buf.set(msg,offset);
       offset += msg.byteLength;
     }
-    return buf.buffer;
+    return this.encoded = buf.buffer;
   },
 
   // decodes from a message like this:
@@ -170,6 +172,7 @@ NetChannel.prototype = {
     if( index !== null ){
       this.buffer.splice(0,index);
       this.bufferLength -= length;
+      this.encoded = null;
     }
   }
 
