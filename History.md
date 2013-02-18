@@ -1,4 +1,11 @@
 
+0.2.0 / 2013-02-18
+==================
+
+  * Updated tests to work with the correct shrink behavior
+  * Cache encoded message until it changes
+  * Shrink based on received ack, not own ack (duh)
+
 0.1.0 / 2013-02-04
 ==================
 
