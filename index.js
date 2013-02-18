@@ -110,6 +110,7 @@ NetChannel.prototype = {
     // read the sequence and ack
     var data = new DataView(buf.buffer || buf)
     var ack = data.getUint16(0)
+    this.shrink(ack)
 
     // read messages
     var offset = 2 // start after ack
@@ -145,25 +146,25 @@ NetChannel.prototype = {
 
       // emit onmessage for each message
       this.onmessage(msg)
+
+      // store the sequence as the last acknowledged one
+      this.ack = seq;
     }
-
-    // store the sequence as the last acknowledged one
-    this.ack = seq;
-
-    this.shrink()
   },
 
   // shrink the buffer & bufferLength up to the
   // acknowledged messages.
   // assumes this.buffer is sorted by sequence
-  shrink: function(){
+  shrink: function(ack){
     var index = null
       , length = 0;
     for(var i=0; i < this.buffer.length; i+=2){
       var s = this.buffer[i];
-      if( s <= this.ack ){
+      if( s <= ack ){
         index = i+2;
         length += this.buffer[i+1].byteLength;
+      } else {
+        break;
       }
     }
     if( index !== null ){
