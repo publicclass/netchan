@@ -151,6 +151,16 @@ NetChannel.prototype = {
       this.bufferLength -= length;
       this.encoded = null;
     }
+  },
+
+  toString: function(){
+    return 'NetChannel\n\t' + [
+      'seq: '+this.seq,
+      'ack: '+this.ack,
+      'buffer: '+this.buffer.length,
+      'buffer size: '+this.bufferLength,
+      'encoded: '+(this.encoded&&this.encoded.byteLength)
+    ].join('\n\t')
   }
 
 }
