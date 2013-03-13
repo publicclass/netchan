@@ -72,7 +72,7 @@ describe('NetChannel',function(){
       expect(dat.getUint8(6)).to.equal(2)  // msg[1]
       expect(dat.getUint8(7)).to.equal(3)  // msg[2]
       expect(dat.getUint8(8)).to.equal(4)  // msg[3]
-      expect(function(){ dat.getUint8(9) }).to.throwError(/Index out of range|IndexSizeError/)
+      expect(function(){ dat.getUint8(9) }).to.throwError(/out of range|IndexSizeError/)
     })
 
     it('should decode 1 message (ack += 1)',function(){
@@ -337,6 +337,11 @@ describe('NetChannel',function(){
     })
   })
 
+  // skip real data channels when testing through node
+  if( typeof window == 'undefined' ){
+    return;
+  }
+
   describe('Real DataChannel',function(){
 
     describe('sanity data channel',function(){
@@ -459,12 +464,15 @@ describe('NetChannel',function(){
 })
 
 
-var PeerConnection = window.RTCPeerConnection
-                  || window.webkitRTCPeerConnection
-                  || window.mozRTCPeerConnection;
 function createDataChannels(fn){
+  var PeerConnection = window.mozRTCPeerConnection // mozilla is dumb
+                    || window.RTCPeerConnection
+                    || window.webkitRTCPeerConnection;
+
   var pc1 = new PeerConnection(null,{optional:[{RtpDataChannels: true}]});
   var pc2 = new PeerConnection(null,{optional:[{RtpDataChannels: true}]});
+
+  // doesn't work on firefox yet. i believe the pc must be opened first
   var ch1 = pc1.createDataChannel('netchan',{reliable:false})
   var ch2;
   ch1.onopen = open;
