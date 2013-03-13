@@ -22,20 +22,20 @@ function NetChannel(channel){
   this.bufferLength = 0;
   this.encoded = null; // cached
 
-  // optional (for testing)
-  if( channel ){
-    if( channel.reliable )
-      throw new ArgumentError('channel must be unreliable. just use the normal data channel instead.')
-    var netchan = this;
-    this.channel = channel;
-    this.channel.addEventListener('message',function(e){ netchan.recv(e) },false)
-  }
+  channel && this.setChannel(channel)
 }
 
 NetChannel.prototype = {
 
   onmessage: noop,
-  onlatency: noop,
+
+  setChannel: function(channel){
+    if( channel.reliable )
+      throw new ArgumentError('channel must be unreliable. just use the normal data channel instead.')
+    var netchan = this;
+    this.channel = channel;
+    this.channel.addEventListener('message',function(e){ netchan.recv(e) },false)
+  },
 
   recv: function(e){
     this.decode(e.data)
