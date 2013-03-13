@@ -10,6 +10,7 @@
   "author": "Robert Sköld <robert@publicclass.se>",
   "license": "MIT",
   "devDependencies": {
+    "base64-arraybuffer": "git://github.com/publicclass/base64-arraybuffer.git",
     "expect.js": "~0.2.0",
     "mocha": "~1.8.1"
   },
