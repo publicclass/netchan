@@ -20,11 +20,6 @@ function NetChannel(channel){
   this.ack = 0;
   this.buffer = []; // [seq,buf]
   this.bufferLength = 0;
-  this.sequences = [];
-  this.latency = undefined;
-  this.sent = {};
-  this.times = [];
-  this.timesIndex = 0;
   this.encoded = null; // cached
 
   // optional (for testing)
