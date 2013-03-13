@@ -4,7 +4,7 @@
   "description": "A NetChan implementation wrapping an unreliable DataChannel.",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha test.js"
+    "test": "./node_modules/.bin/mocha"
   },
   "repository": "",
   "author": "Robert Sköld <robert@publicclass.se>",
