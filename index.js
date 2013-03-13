@@ -44,14 +44,17 @@ NetChannel.prototype = {
 
   send: function(msg){
     // accept any TypedArray
-    if( msg && (msg.buffer instanceof ArrayBuffer) )
+    if( msg && (msg.buffer instanceof ArrayBuffer) ){
       msg = msg.buffer;
+    }
 
-    if( !(msg instanceof ArrayBuffer) )
+    if( !(msg instanceof ArrayBuffer) ){
       throw new Error('invalid message type, only binary is supported');
+    }
 
-    if( msg.byteLength > 255 )
+    if( msg.byteLength > 255 ){
       throw new Error('invalid message length, only up to 256 bytes are supported')
+    }
 
     // grow by 3 bytes (seq & len)
     var seq = this.seq++;
@@ -69,8 +72,9 @@ NetChannel.prototype = {
   },
 
   flush: function(){
-    if( this.bufferLength && this.channel )
+    if( this.bufferLength && this.channel ){
       this.channel.send(this.encoded || this.encode());
+    }
   },
 
   // encodes into a message like this:
