@@ -112,7 +112,7 @@ NetChannel.prototype = {
       , len = 0;
 
     while(offset < length){
-      seq = data.getUint16(offset);
+      seq = data.getUint16(offset,false); // false is required for node test only
       len = data.getUint8(offset+2);
       if( seq <= this.ack ){
         offset += len+3; // len + seq = 3 bytes
