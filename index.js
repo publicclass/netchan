@@ -1,7 +1,4 @@
 
-var latency = require('latency');
-
-
 module.exports = NetChannel;
 
 /**
@@ -14,10 +11,6 @@ module.exports = NetChannel;
  *
  * After sending and the buffer is not empty after a timeout
  * it will try to send again until it is.
- *
- * It will also track the latency of the packets by keeping
- * a list of times when each sequence was sent and comparing
- * against that when that sequence has been acknowledged.
  *
  * Inspired by NetChan by Id software.
  */
@@ -75,7 +68,6 @@ NetChannel.prototype = {
 
     this.bufferLength += buf.byteLength;
     this.buffer.push(seq,buf);
-    this.sent[''+seq] = Date.now();
     this.encoded = null;
 
     this.flush();
@@ -126,20 +118,6 @@ NetChannel.prototype = {
       if( seq <= this.ack ){
         offset += len+3; // len + seq = 3 bytes
         continue;
-      }
-
-      if( this.sent[''+seq] ){
-        // store the time it took to get an ack
-        // in a circular times buffer
-        this.times[this.timesIndex] = Date.now() - this.sent[''+seq];
-        delete this.sent[''+seq];
-        this.timesIndex = (this.timesIndex + 1) % 30;
-
-        // recalc every 10 message
-        if( this.timesIndex % 10 == 0 ){
-          this.latency = latency(this.times);
-          this.onlatency(this.latency);
-        }
       }
 
       // get the message
