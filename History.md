@@ -1,4 +1,10 @@
 
+0.3.0 / 2013-03-13
+==================
+
+  * Got the tests to work in node for that pretty green badge.
+  * Removed latency code. Better to be dealt with in the app.
+
 0.2.0 / 2013-02-18
 ==================
 
