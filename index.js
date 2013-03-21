@@ -15,12 +15,14 @@ module.exports = NetChannel;
  * Inspired by NetChan by Id software.
  */
 
-function NetChannel(channel){
+function NetChannel(channel,opts){
   this.seq = 1;
   this.ack = 0;
   this.buffer = []; // [seq,buf]
   this.bufferLength = 0;
   this.encoded = null; // cached
+
+  this.options = opts || {}
 
   channel && this.setChannel(channel)
 }
@@ -74,6 +76,12 @@ NetChannel.prototype = {
   flush: function(){
     if( this.bufferLength && this.channel ){
       this.channel.send(this.encoded || this.encode());
+    }
+
+    // try again every 50ms
+    if( this.options.resend ){
+      clearTimeout(this.timeout)
+      this.timeout = setTimeout(this.flush.bind(this),this.options.resend)
     }
   },
 
