@@ -1,16 +1,56 @@
-try {
-// browser
-var NetChannel = require('netchan')
-  , base64 = require('publicclass-base64-arraybuffer');
+if( typeof module == 'undefined' ){
+  // browser
+  var NetChannel = require('netchan')
+    , base64 = require('publicclass-base64-arraybuffer');
 
-} catch(e){
-// node
-var NetChannel = require('../')
-  , base64 = require('base64-arraybuffer')
-  , expect = require('expect.js');
+} else {
+  // node
+  var NetChannel = require('../')
+    , base64 = require('base64-arraybuffer')
+    , expect = require('expect.js');
 }
 
 describe('NetChannel',function(){
+
+  describe('isACK',function(){
+    it('should be true for ACK',function(){
+      var buf = NetChannel.ACK;
+      expect(NetChannel._isACK(buf)).to.be.true;
+    })
+    it('should be true for copy of ACK',function(){
+      var buf = NetChannel.ACK.slice(0);
+      expect(NetChannel._isACK(buf)).to.be.true;
+    })
+    it('should not for broken copy of ACK',function(){
+      var buf = NetChannel.ACK.slice(1);
+      expect(NetChannel._isACK(buf)).to.be.true;
+    })
+    it('should not for empty buffer',function(){
+      var buf = new ArrayBuffer(0);
+      expect(NetChannel._isACK(buf)).to.be.false;
+    })
+    it('should not for equal length buffer',function(){
+      var buf = new ArrayBuffer(NetChannel.ACK.byteLength);
+      expect(NetChannel._isACK(buf)).to.be.false;
+    })
+    it('should not for short buffer',function(){
+      var buf = new ArrayBuffer(3);
+      expect(NetChannel._isACK(buf)).to.be.false;
+    })
+    it('should not for long buffer',function(){
+      var buf = new ArrayBuffer(1024);
+      expect(NetChannel._isACK(buf)).to.be.false;
+    })
+    it('should not for undefined buffer',function(){
+      var buf;
+      expect(NetChannel._isACK(buf)).to.be.false;
+    })
+    it('should not for array buffer',function(){
+      var buf = [];
+      expect(NetChannel._isACK(buf)).to.be.false;
+    })
+
+  })
 
   describe('[1,2,3,4]',function(){
     var netchan
