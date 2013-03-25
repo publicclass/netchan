@@ -13,19 +13,30 @@ module.exports = NetChannel;
  * it will try to send again until it is.
  *
  * Inspired by NetChan by Id software.
+ *
+ *  Options:
+ *
+ *    - {Number} `resend` a number in ms if how often it should try to flush again.
+ *    - {Boolean} `ack` if true an ACK packet will automatically be responded with to keep the buffer clean.
+ *
+ * @param {DataChannel} channel
+ * @param {Object} opts
  */
-
 function NetChannel(channel,opts){
   this.seq = 1;
   this.ack = 0;
   this.buffer = []; // [seq,buf]
   this.bufferLength = 0;
   this.encoded = null; // cached
-
   this.options = opts || {}
 
   channel && this.setChannel(channel)
 }
+
+// magic packet
+var ACK = 'ncACK'.split('').map(function(c){return c.charCodeAt(0)})
+NetChannel.ACK = new Uint8Array(ACK).buffer;
+NetChannel._isACK = isACK; // export for testing only
 
 NetChannel.prototype = {
 
@@ -74,14 +85,14 @@ NetChannel.prototype = {
   },
 
   flush: function(){
-    if( this.bufferLength && this.channel ){
+    if( this.bufferLength && this.channel && this.channel.readyState == 'open' ){
       this.channel.send(this.encoded || this.encode());
-    }
 
-    // try again every 50ms
-    if( this.options.resend ){
-      clearTimeout(this.timeout)
-      this.timeout = setTimeout(this.flush.bind(this),this.options.resend)
+      // try again every X ms and stop when buffer is empty
+      if( this.options.resend ){
+        clearTimeout(this._timeout)
+        this._timeout = setTimeout(this.flush.bind(this),this.options.resend)
+      }
     }
   },
 
@@ -117,7 +128,8 @@ NetChannel.prototype = {
     var offset = 2 // start after ack
       , length = buf.byteLength
       , seq = this.ack // in case no messages are read, its the same
-      , len = 0;
+      , len = 0
+      , sendACK = false;
 
     while(offset < length){
       seq = data.getUint16(offset,false); // false is required for node test only
@@ -131,11 +143,22 @@ NetChannel.prototype = {
       var msg = data.buffer.slice(offset+3,offset+3+len);
       offset += len+3;
 
-      // emit onmessage for each message
-      this.onmessage(msg)
+      // emit onmessage for each message unless it's an ACK
+      if( !this.options.ack || !isACK(msg) ){
+        this.onmessage(msg);
+        sendACK = true;
+      // } else {
+      //   console.log('skipping onmessage because it\'s an ACK')
+      }
 
       // store the sequence as the last acknowledged one
       this.ack = seq;
+    }
+
+    // send an ACK
+    if( this.options.ack && sendACK ){
+      // console.log('sending ACK')
+      this.send(NetChannel.ACK);
     }
   },
 
@@ -170,7 +193,28 @@ NetChannel.prototype = {
       'encoded: '+(this.encoded&&this.encoded.byteLength)
     ].join('\n\t')
   }
-
 }
 
 function noop(){}
+
+function isACK(msg){
+  // check the type
+  if( !msg || typeof msg != typeof NetChannel.ACK ){
+    return false;
+  }
+
+  // check the length
+  if( msg.byteLength !== NetChannel.ACK.byteLength ){
+    return false;
+  }
+  // check if they have the same contents
+  var arr = new Uint8Array(msg);
+  for(var i=0; i<ACK.length; i++){
+    if( arr[i] !== ACK[i] ){
+      return false;
+    }
+  }
+
+  // yup. it's an ACK
+  return true;
+}
