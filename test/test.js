@@ -624,6 +624,7 @@ function MockDataChannel(peer){
   this.peer = peer;
   this.reliable = false;
   this.callbacks = {};
+  this.readyState = 'open';
 
   this.addEventListener = function(type,fn){
     this.callbacks[type] = this.callbacks[type] || []
