@@ -1,4 +1,10 @@
 
+0.4.0 / 2013-03-25
+==================
+
+  * Added an option to respond with ACKs to keep the buffer flushed (ex. {ack:true}).
+  * Added an option to keep flushing the buffer using a timeout (ex. {resend: 50}).
+
 0.3.0 / 2013-03-13
 ==================
 
