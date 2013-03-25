@@ -485,17 +485,78 @@ describe('NetChannel',function(){
           nc2.send(new Uint8Array([i]))
       })
 
-      it('should be able to send many messages nc2 > nc1 manual flush',function(done){
-        var recv = 30;
+      after(function(){
+        // ideally I'd like the two netchans to be empty after
+        // this. but one of them will always keep an ACK in the
+        // buffer (and keep trying to resend it..)
+        console.log('nc1 buffer',nc1.bufferLength)
+        console.log('nc2 buffer',nc2.bufferLength)
+      })
+    })
+
+    describe('using netchannel {ack:true,resend:50}',function(){
+      var dc1;
+      var dc2;
+      var nc1;
+      var nc2;
+
+      before(function(done){
+        createDataChannels(function(ch1,ch2){
+          dc1 = ch1;
+          dc2 = ch2;
+          nc1 = new NetChannel(dc1,{ack:1,resend:50});
+          nc2 = new NetChannel(dc2,{ack:1,resend:50});
+          done()
+        })
+      })
+
+      it('should have created channels',function(){
+        expect(dc1).to.exist
+        expect(dc2).to.exist
+        expect(nc1).to.exist
+        expect(nc2).to.exist
+      })
+
+      it('should wrap the netchannels with base64',function(){
+        wrapWithBase64(nc1)
+        wrapWithBase64(nc2)
+      })
+
+      it('should send a message nc1 > nc2',function(done){
         nc2.onmessage = function(m){
-          expect(new Uint8Array(m)).to.eql(new Uint8Array([recv]))
-          --recv || done()
+          expect(new Uint8Array(m)).to.eql(new Uint8Array([1,2,3,4]))
+          done()
         }
-        nc1.autoFlush = false;
-        for(var i=recv; i >= 0; i--)
+        nc1.send(new Uint8Array([1,2,3,4]))
+      })
+
+      it('should be able to send many messages nc2 > nc1 > nc2',function(done){
+        var recv1 = 30
+        var recv2 = 100
+        var pending = 2;
+        function next(){ --pending || done() }
+        nc2.onmessage = function(m){
+          expect(new Uint8Array(m)).to.eql(new Uint8Array([recv2]))
+          --recv2 || next()
+        }
+        nc1.onmessage = function(m){
+          expect(new Uint8Array(m)).to.eql(new Uint8Array([recv1]))
+          --recv1 || next()
+        }
+        for(var i=recv1; i>=0; i--){
+          nc2.send(new Uint8Array([i]))
+        }
+        for(var i=recv2; i>=0; i--){
           nc1.send(new Uint8Array([i]))
-        nc1.flush();
-        nc1.autoFlush = true;
+        }
+      })
+
+      after(function(){
+        // ideally I'd like the two netchans to be empty after
+        // this. but one of them will always keep an ACK in the
+        // buffer (and keep trying to resend it..)
+        console.log('nc1 buffer',nc1.bufferLength)
+        console.log('nc2 buffer',nc2.bufferLength)
       })
 
     })
@@ -525,6 +586,7 @@ function createDataChannels(fn){
     pc2.createAnswer(function(desc){
       pc2.setLocalDescription(desc);
       pc1.setRemoteDescription(desc);
+      // console.log('set both local/remove descriptions')
     })
   })
   var pending = 2;
