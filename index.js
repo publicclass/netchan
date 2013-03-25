@@ -147,8 +147,6 @@ NetChannel.prototype = {
       if( !this.options.ack || !isACK(msg) ){
         this.onmessage(msg);
         sendACK = true;
-      // } else {
-      //   console.log('skipping onmessage because it\'s an ACK')
       }
 
       // store the sequence as the last acknowledged one
@@ -157,7 +155,6 @@ NetChannel.prototype = {
 
     // send an ACK
     if( this.options.ack && sendACK ){
-      // console.log('sending ACK')
       this.send(NetChannel.ACK);
     }
   },
