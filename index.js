@@ -145,7 +145,9 @@ NetChannel.prototype = {
 
       // emit onmessage for each message unless it's an ACK
       if( !this.options.ack || !isACK(msg) ){
-        this.onmessage(msg);
+        if( typeof this.onmessage == 'function' ){
+          this.onmessage(msg);
+        }
         sendACK = true;
       }
 
